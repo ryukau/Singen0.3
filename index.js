@@ -91,6 +91,9 @@ class UI {
       "16x Sampling", false, () => { this.refresh() })
     this.inputLength = new NumberInput(this.divMiscControls.element,
       "Length", 1, 0.02, 16, 0.01, () => { this.refresh() }, true)
+    this.inputSeed = new NumberInput(this.divMiscControls.element,
+      "Seed", 0, 0, Math.floor(Number.MAX_SAFE_INTEGER / 2), 1,
+      () => { this.refresh() })
     this.inputDeclickIn = new NumberInput(this.divMiscControls.element,
       "DeclickIn", 0.001, 0, 0.01, 0.0001, () => { this.refresh() }, true)
     this.inputDecayTension = new NumberInput(this.divMiscControls.element,
@@ -102,8 +105,8 @@ class UI {
 
     // TODO: some stereo
 
-    this.envelopeViewGainCar = new EnvelopeView(this.divCarrierControls.element,
-      223, 96, 0.2, 0.5, 0.4, 0.2, "CarrierGain", () => { this.refresh() })
+    this.envelopeViewCarGain = new EnvelopeView(this.divCarrierControls.element,
+      223, 96, 0.2, 0.5, 0.4, 0.2, "Car.Gain", () => { this.refresh() })
     this.overtoneCarrier = new OvertoneControl(this.divCarrierControls.element,
       223, 96, 16, () => { this.refresh() })
 
@@ -113,12 +116,12 @@ class UI {
     this.divFilterCutoffCar = new Div(this.divFilterCar.element,
       "CutoffCar")
     this.headingCutoffCar = new Heading(this.divFilterCutoffCar.element,
-      6, "Cutoff")
-    this.inputAmountCutoffCar = new NumberInput(this.divFilterCutoffCar.element,
+      6, "Car.Cutoff")
+    this.inputCarCutoffAmount = new NumberInput(this.divFilterCutoffCar.element,
       "Amount", 1, 0, 1, 0.001, () => { this.refresh() }, true)
-    this.inputBiasCutoffCar = new NumberInput(this.divFilterCutoffCar.element,
+    this.inputCarCutoffBias = new NumberInput(this.divFilterCutoffCar.element,
       "Bias", 200, 20, 20000, 0.001, () => { this.refresh() }, true)
-    this.inputTensionCutoffCar = new NumberInput(this.divFilterCutoffCar.element,
+    this.inputCarCutoffTension = new NumberInput(this.divFilterCutoffCar.element,
       "Tension", -2, -5, 0, 0.001, () => { this.refresh() }, false)
 
     this.divFilterSplitter = new Div(this.divFilterCar.element,
@@ -126,14 +129,14 @@ class UI {
     this.divFilterQCar = new Div(this.divFilterCar.element,
       "QCar")
     this.headingQCar = new Heading(this.divFilterQCar.element,
-      6, "Q")
-    this.inputAmountQCar = new NumberInput(this.divFilterQCar.element,
+      6, "Car.Q")
+    this.inputCarQAmount = new NumberInput(this.divFilterQCar.element,
       "Amount", 0.3, 0, 1, 0.001, () => { this.refresh() }, false)
-    this.inputBiasQCar = new NumberInput(this.divFilterQCar.element,
+    this.inputCarQBias = new NumberInput(this.divFilterQCar.element,
       "Bias", 0.1, 0, 1, 0.001, () => { this.refresh() }, false)
-    this.inputTensionQCar = new NumberInput(this.divFilterQCar.element,
+    this.inputCarQTension = new NumberInput(this.divFilterQCar.element,
       "Tension", -2, -5, 0, 0.001, () => { this.refresh() }, false)
-    this.inputFilterCarStack = new NumberInput(this.divCarrierControls.element,
+    this.inputCarFilterStack = new NumberInput(this.divCarrierControls.element,
       "FilterStack", 6, 1, 16, 1, () => { this.refresh() }, false)
     this.inputFrequency = new NumberInput(this.divCarrierControls.element,
       "Frequency", 220 * Math.pow(2, -9 / 12), 20, 2000, 0.01,
@@ -145,7 +148,11 @@ class UI {
     this.inputModMix = new NumberInput(this.divCarrierControls.element,
       "Mod:PAD Mix", 0.5, 0, 1, 0.001, () => { this.refresh() })
 
-    this.divModulatorControls = new Div(this.divControlLeft.element, "Modulator")
+    //// ControlRight
+    this.divControlRight = new Div(this.divMain.element,
+      "controlRight", "controlBlock")
+
+    this.divModulatorControls = new Div(this.divControlRight.element, "Modulator")
     this.headingModulator = new Heading(this.divModulatorControls.element,
       6, "Modulator")
     this.inputModulatorRatio = new NumberInput(this.divModulatorControls.element,
@@ -159,10 +166,6 @@ class UI {
       () => { this.refresh() }
     )
 
-    //// ControlRight
-    this.divControlRight = new Div(this.divMain.element,
-      "controlRight", "controlBlock")
-
     this.divPadsynthControls = new Div(this.divControlRight.element,
       "PadsynthControls")
     this.headingPadsynth = new Heading(this.divPadsynthControls.element,
@@ -171,22 +174,19 @@ class UI {
       "Ratio", 0.375, 0, 16, 0.0001, () => { this.refresh() }, true)
     this.inputBandWidth = new NumberInput(this.divPadsynthControls.element,
       "BandWidth", 10, 0.01, 100, 0.01, () => { this.refresh() }, true)
-    this.inputSeed = new NumberInput(this.divPadsynthControls.element,
-      "Seed", 0, 0, Math.floor(Number.MAX_SAFE_INTEGER / 2), 1,
-      () => { this.refresh() })
     this.overtonePad = new OvertoneControl(this.divPadsynthControls.element,
-      448, 128, 32, () => { this.refresh() })
+      448, 96, 32, () => { this.refresh() })
 
     // TODO: 余ってるスペースに何か入れる。
-    this.envelopeViewGainPad = new EnvelopeView(this.divPadsynthControls.element,
-      223, 96, 0.2, 0.5, 0.4, 0.2, "PadGain", () => { this.refresh() })
+    this.envelopeViewPadGain = new EnvelopeView(this.divPadsynthControls.element,
+      223, 96, 0.2, 0.5, 0.4, 0.2, "PAD.Gain", () => { this.refresh() })
 
 
-    this.envelopeCutoff = new EnvelopeControl(this.divPadsynthControls.element,
-      "Cutoff", 223, 96, 0.2, 0.5, 0.4, 0.2, 1, 0.2, 0, 1, 0.001, false,
+    this.envelopePadCutoff = new EnvelopeControl(this.divPadsynthControls.element,
+      "PAD.Cutoff", 223, 96, 0.2, 0.5, 0.4, 0.2, 1, 0.2, 0, 1, 0.001, false,
       () => { this.refresh() })
-    this.envelopeResonance = new EnvelopeControl(this.divPadsynthControls.element,
-      "Resonance", 223, 96, 0.2, 0.5, 0.4, 0.2, 0.3, 0.1, 0, 1, 0.0001, false,
+    this.envelopePadQ = new EnvelopeControl(this.divPadsynthControls.element,
+      "PAD.Q", 223, 96, 0.2, 0.5, 0.4, 0.2, 0.3, 0.1, 0, 1, 0.0001, false,
       () => { this.refresh() })
 
     this.refresh()
@@ -203,17 +203,18 @@ class UI {
       sampleRate: this.audioContext.sampleRate,
       overSampling: this.checkboxResample.value ? 16 : 1,
       length: this.inputLength.value,
+      seed: this.inputSeed.value,
       gainCarTension: this.inputDecayTension.value,
 
-      envGainCar: this.envelopeViewGainCar.value,
+      envCarGain: this.envelopeViewCarGain.value,
       overtoneCar: this.overtoneCarrier.overtone,
-      amountCutoffCar: this.inputAmountCutoffCar.value,
-      biasCutoffCar: this.inputBiasCutoffCar.value,
-      tensionCutoffCar: this.inputTensionCutoffCar.value,
-      amountQCar: this.inputAmountQCar.value,
-      biasQCar: this.inputBiasQCar.value,
-      tensionQCar: this.inputTensionQCar.value,
-      filterCarStack: this.inputFilterCarStack.value,
+      carCutoffAmount: this.inputCarCutoffAmount.value,
+      carCutoffBias: this.inputCarCutoffBias.value,
+      carCutoffTension: this.inputCarCutoffTension.value,
+      carQAmount: this.inputCarQAmount.value,
+      carQBias: this.inputCarQBias.value,
+      carQTension: this.inputCarQTension.value,
+      carFilterStack: this.inputCarFilterStack.value,
       frequency: this.inputFrequency.value,
       detuneCar: this.inputDetune.value,
       modIndex: this.inputModIndex.value,
@@ -225,11 +226,10 @@ class UI {
 
       ratioPad: this.inputRatioPad.value,
       bandWidth: this.inputBandWidth.value,
-      seed: this.inputSeed.value,
       overtonePad: this.overtonePad.overtone,
-      envGainPad: this.envelopeViewGainPad.value,
-      envCutoff: this.envelopeCutoff.value,
-      envResonance: this.envelopeResonance.value,
+      envPadGain: this.envelopeViewPadGain.value,
+      envPadCutoff: this.envelopePadCutoff.value,
+      envPadQ: this.envelopePadQ.value,
     }
   }
 
@@ -240,16 +240,16 @@ class UI {
       // this.inputDeclickIn.value = randomRange(0, 0.001)
       this.inputDecayTension.random()
 
-      this.envelopeViewGainCar.random()
+      this.envelopeViewCarGain.random()
       this.overtoneCarrier.sparseRandom()
-      this.inputAmountCutoffCar.random()
-      this.inputBiasCutoffCar.random()
-      this.inputTensionCutoffCar.random()
-      this.inputAmountQCar.random()
-      this.inputBiasQCar.random()
-      this.inputTensionQCar.random()
-      this.inputFilterCarStack.value = randomRangeInt(
-        this.inputFilterCarStack.min, this.inputFilterCarStack.max)
+      this.inputCarCutoffAmount.random()
+      this.inputCarCutoffBias.random()
+      this.inputCarCutoffTension.random()
+      this.inputCarQAmount.random()
+      this.inputCarQBias.random()
+      this.inputCarQTension.random()
+      this.inputCarFilterStack.value = randomRangeInt(
+        this.inputCarFilterStack.min, this.inputCarFilterStack.max)
       // this.inputFrequency.random()
       this.inputDetune.random()
       this.inputModIndex.value = randomRange(0, 2)
@@ -263,9 +263,9 @@ class UI {
       this.inputBandWidth.random()
       this.inputSeed.random()
       this.overtonePad.random()
-      this.envelopeViewGainPad.random()
-      this.envelopeCutoff.random()
-      this.envelopeResonance.random()
+      this.envelopeViewPadGain.random()
+      this.envelopePadCutoff.random()
+      this.envelopePadQ.random()
     }
     this.refresh()
   }

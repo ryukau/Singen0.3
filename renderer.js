@@ -71,12 +71,12 @@ onmessage = (event) => {
   var sound = new Array(Math.floor(sampleRate * params.length)).fill(0)
 
   // PADsynth
-  var envGainPad = new Envelope(
-    params.envGainPad.x1, params.envGainPad.y1,
-    params.envGainPad.x2, params.envGainPad.y2)
+  var envPadGain = new Envelope(
+    params.envPadGain.x1, params.envPadGain.y1,
+    params.envPadGain.x2, params.envPadGain.y2)
 
-  var cutoff = createEnvelope(params.envCutoff)
-  var resonance = createEnvelope(params.envResonance)
+  var padCutoff = createEnvelope(params.envPadCutoff)
+  var padQ = createEnvelope(params.envPadQ)
 
   var padsynth = new PADSynth(
     sampleRate,
@@ -84,15 +84,15 @@ onmessage = (event) => {
     params.ratioPad * params.frequency,
     params.overtonePad,
     params.bandWidth)
-  var filter = new SVFStack(sampleRate, 1000, 0.5, 4)
+  var padLP = new SVFStack(sampleRate, 1000, 0.5, 4)
 
   for (var i = 0; i < sound.length; ++i) {
     var envTime = i / sound.length
 
-    filter.cutoff = cutoff.factor * cutoff.env.decay(envTime) + cutoff.bias
-    filter.q = resonance.factor * resonance.env.decay(envTime) + resonance.bias
+    padLP.cutoff = padCutoff.factor * padCutoff.env.decay(envTime) + padCutoff.bias
+    padLP.q = padQ.factor * padQ.env.decay(envTime) + padQ.bias
 
-    sound[i] = filter.lowpass(envGainPad.decay(envTime) * padsynth.oscillate())
+    sound[i] = padLP.lowpass(envPadGain.decay(envTime) * padsynth.oscillate())
   }
 
   sound = normalize(sound)
@@ -110,30 +110,30 @@ onmessage = (event) => {
   }
 
   // Carrier
-  var envGainCar = new Envelope(
-    params.envGainCar.x1, params.envGainCar.y1,
-    params.envGainCar.x2, params.envGainCar.y2)
-  var envGainCarExp = new ExpDecay(sound.length, 10 ** params.gainCarTension)
+  var envCarGain = new Envelope(
+    params.envCarGain.x1, params.envCarGain.y1,
+    params.envCarGain.x2, params.envCarGain.y2)
+  var envCarGainExp = new ExpDecay(sound.length, 10 ** params.gainCarTension)
 
   var biquad = new BiQuadStack(
-    params.filterCarStack, sampleRate, "lowpass", 1000, 0.5, 0)
-  var envBiquadCutoff = new ExpDecay(sound.length, 10 ** params.tensionCutoffCar)
-  var envBiquadQ = new ExpDecay(sound.length, 10 ** params.tensionQCar)
+    params.carFilterStack, sampleRate, "lowpass", 1000, 0.5, 0)
+  var envBiquadCutoff = new ExpDecay(sound.length, 10 ** params.carCutoffTension)
+  var envBiquadQ = new ExpDecay(sound.length, 10 ** params.carQTension)
 
   var carrier = new AdditiveSin(
     sampleRate, rnd, params.frequency, params.detuneCar, params.overtoneCar)
 
   var modIndex = params.modIndex / params.overSampling
-  var amountCutoffCar = params.amountCutoffCar * (20000 - params.biasCutoffCar)
-  var amountQCar = params.amountQCar * (1 - params.biasQCar)
+  var carCutoffAmount = params.carCutoffAmount * (20000 - params.carCutoffBias)
+  var carQAmount = params.carQAmount * (1 - params.carQBias)
   for (var i = 0; i < sound.length; ++i) {
     sound[i]
-      = envGainCar.decay(i / sound.length)
+      = envCarGain.decay(i / sound.length)
       * carrier.oscillate(modIndex * sound[i])
 
-    biquad.cutoff = envBiquadCutoff.env() * amountCutoffCar + params.biasCutoffCar
-    biquad.q = envBiquadQ.env() * amountQCar + params.biasQCar
-    sound[i] = envGainCarExp.env() * biquad.process(sound[i])
+    biquad.cutoff = envBiquadCutoff.env() * carCutoffAmount + params.carCutoffBias
+    biquad.q = envBiquadQ.env() * carQAmount + params.carQBias
+    sound[i] = envCarGainExp.env() * biquad.process(sound[i])
 
     if (!Number.isFinite(sound[i])) sound[i] = 0
   }
