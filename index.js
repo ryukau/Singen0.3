@@ -301,7 +301,7 @@ class UI {
   save() {
     var buffer = Wave.toBuffer(this.wave, this.wave.channels)
     var header = Wave.fileHeader(
-      this.audioContext.sampleRate, this.wave.channels, buffer.length)
+      this.audioContext.sampleRate, this.wave.channels, buffer.length, false)
 
     var blob = new Blob([header, buffer], { type: "application/octet-stream" })
     var url = window.URL.createObjectURL(blob)

@@ -197,90 +197,64 @@ class Wave {
   // Quick references.
   // http://www.piclist.com/techref/io/serial/midi/wave.html
   // https://sites.google.com/site/musicgapi/technical-documents/wav-file-format
-  static fileHeader(sampleRate, channels, bufferLength) {
+  static fileHeader(sampleRate, channels, bufferLength, loop = false) {
     var format = this.fileFormat(sampleRate, 32, channels)
 
-    var riff = this.stringToAscii("RIFF")
-    var riffChunkSize = this.uint32buffer(110 + bufferLength)
+    var header = []
 
-    var wave = this.stringToAscii("WAVE")
+    //
+    // fmt_, 18 + 8 = 26 [byte]
+    // fact, 4 + 8 = 12 [byte]
+    // smpl, 60 + 8 = 68 [byte]
+    // data, 4 + bufferLength [byte]
+    //
+    var riffChunkSize = loop ? 110 : 86
+    var smplChunkSize = loop ? 60 : 36
 
-    var fmt_ = this.stringToAscii("fmt ") // 18 + 8 = 26 [byte]
-    var fmtChunkSize = this.uint32buffer(18)
-    var formatTag = this.uint16buffer(0x0003) // IEEE 32bit float
-    var channels = this.uint16buffer(format.channels)
-    var samplePerSec = this.uint32buffer(format.sampleRate)
-    var bytesPerSec = this.uint32buffer(format.sampleRate * format.bytesPerFrame)
-    var blockAlign = this.uint16buffer(format.bytesPerFrame)
-    var bitsPerSample = this.uint16buffer(format.sampleSize)
-    var cbSize = this.uint16buffer(0x0000)
+    header.push(this.stringToAscii("RIFF")) // riff
+    header.push(this.uint32buffer(riffChunkSize + bufferLength)) // riffChunkSize
 
-    var fact = this.stringToAscii("fact") // 4 + 8 = 12 [byte]
-    var factChunkSize = this.uint32buffer(4)
-    var sampleLength = this.uint32buffer(bufferLength / format.bytesPerFrame)
+    header.push(this.stringToAscii("WAVE")) // wave
 
-    var smpl = this.stringToAscii("smpl") // 60 + 8 = 68 [byte]
-    var smplChunkSize = this.uint32buffer(60) // 36 + 24 * numLoop
-    var manufacturer = this.uint32buffer(0)
-    var product = this.uint32buffer(0)
-    var samplePeriod = this.uint32buffer(1e9 / format.sampleRate)
-    var midiUnityNote = this.uint32buffer(60) // 72?
-    var midiPitchFraction = this.uint32buffer(0)
-    var smpteFormat = this.uint32buffer(0)
-    var smpteOffset = this.uint32buffer(0)
-    var numSampleLoops = this.uint32buffer(1)
-    var samplerData = this.uint32buffer(24)
-    var cuePointID = this.uint32buffer(0)
-    var type = this.uint32buffer(0)
-    var start = this.uint32buffer(0)
-    var end = this.uint32buffer(bufferLength - format.bytesPerFrame) // 要テスト
-    var fraction = this.uint32buffer(0)
-    var playCount = this.uint32buffer(0)
+    header.push(this.stringToAscii("fmt ")) // fmt_
+    header.push(this.uint32buffer(18)) // fmtChunkSize
+    header.push(this.uint16buffer(0x0003)) // formatTag, 0x0003 = IEEE 32bit float
+    header.push(this.uint16buffer(format.channels)) // channels
+    header.push(this.uint32buffer(format.sampleRate)) // samplePerSec
+    header.push(this.uint32buffer(format.sampleRate * format.bytesPerFrame)) // bytesPerSec
+    header.push(this.uint16buffer(format.bytesPerFrame)) // blockAlign
+    header.push(this.uint16buffer(format.sampleSize)) // bitsPerSample
+    header.push(this.uint16buffer(0x0000)) // cbSize
 
-    var data = this.stringToAscii("data") // 4 + bufferLength [byte]
-    var dataChunkSize = this.uint32buffer(bufferLength)
+    header.push(this.stringToAscii("fact")) // fact
+    header.push(this.uint32buffer(4)) // factChunkSize
+    header.push(this.uint32buffer(bufferLength / format.bytesPerFrame)) // sampleLength
 
-    return this.concatTypedArray(
-      riff,
-      riffChunkSize,
+    header.push(this.stringToAscii("smpl")) // smpl
+    header.push(this.uint32buffer(smplChunkSize)) // smplChunkSize, 36 + 24 * numLoop
+    header.push(this.uint32buffer(0)) // manufacturer
+    header.push(this.uint32buffer(0)) // product
+    header.push(this.uint32buffer(1e9 / format.sampleRate)) // samplePeriod
+    header.push(this.uint32buffer(60)) // midiUnityNote
+    header.push(this.uint32buffer(0)) // midiPitchFraction
+    header.push(this.uint32buffer(0)) // smpteFormat
+    header.push(this.uint32buffer(0)) // smpteOffset
+    header.push(this.uint32buffer(1)) // numSampleLoops
+    header.push(this.uint32buffer(loop ? 24 : 0)) // samplerData
 
-      wave,
+    if (loop) {
+      header.push(this.uint32buffer(0)) // cuePointID
+      header.push(this.uint32buffer(0)) // type
+      header.push(this.uint32buffer(0)) // start
+      header.push(this.uint32buffer(bufferLength - format.bytesPerFrame)) // end
+      header.push(this.uint32buffer(0)) // fraction
+      header.push(this.uint32buffer(0)) // playCount
+    }
 
-      fmt_,
-      fmtChunkSize,
-      formatTag,
-      channels,
-      samplePerSec,
-      bytesPerSec,
-      blockAlign,
-      bitsPerSample,
-      cbSize,
+    header.push(this.stringToAscii("data")) // data
+    header.push(this.uint32buffer(bufferLength)) // dataChunkSize
 
-      fact,
-      factChunkSize,
-      sampleLength,
-
-      smpl,
-      smplChunkSize,
-      manufacturer,
-      product,
-      samplePeriod,
-      midiUnityNote,
-      midiPitchFraction,
-      smpteFormat,
-      smpteOffset,
-      numSampleLoops,
-      samplerData,
-      cuePointID,
-      type,
-      start,
-      end,
-      fraction,
-      playCount,
-
-      data,
-      dataChunkSize
-    )
+    return this.concatTypedArray(header)
   }
 
   static uint16buffer(value) {
@@ -303,15 +277,15 @@ class Wave {
     return ascii
   }
 
-  static concatTypedArray() {
+  static concatTypedArray(arrays) {
     var length = 0
-    for (var i = 0; i < arguments.length; ++i) {
-      length += arguments[i].byteLength
+    for (var i = 0; i < arrays.length; ++i) {
+      length += arrays[i].byteLength
     }
     var array = new Uint8Array(length)
     var index = 0
-    for (var i = 0; i < arguments.length; ++i) {
-      var uint8 = new Uint8Array(arguments[i].buffer)
+    for (var i = 0; i < arrays.length; ++i) {
+      var uint8 = new Uint8Array(arrays[i].buffer)
       for (var j = 0; j < uint8.length; ++j) {
         array[index] = uint8[j]
         ++index
