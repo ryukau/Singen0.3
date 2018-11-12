@@ -53,6 +53,9 @@ class UI {
         ["", "Overtoneの値はCtrl+クリックで0、Alt+クリックで1に設定できます。"]
       ]
     )
+    this.description.add("信号の流れ", "")
+    this.description.addImage(
+      "img/signal_flow.svg", "Signal flow graph of Singen0.3.")
 
     this.divWaveform = new Div(this.divMain.element, "waveform")
     this.headingWaveform = new Heading(this.divWaveform.element, 6, "Waveform")

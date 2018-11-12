@@ -209,6 +209,13 @@ class Description {
     this.details.appendChild(dd)
   }
 
+  addImage(src, alt) {
+    var img = document.createElement("img")
+    img.src = src
+    img.alt = alt
+    this.details.appendChild(img)
+  }
+
   addArray(descriptions) {
     // descriptions = [["term0", "description0"], ["term1", "description1"], ...]
     for (var desc of descriptions) {
