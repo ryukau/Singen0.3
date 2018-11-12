@@ -205,11 +205,10 @@ class Wave {
     //
     // fmt_, 18 + 8 = 26 [byte]
     // fact, 4 + 8 = 12 [byte]
-    // smpl, 60 + 8 = 68 [byte]
+    // smpl, 36 + 24 * numLoop + 8 = 68 [byte]
     // data, 4 + bufferLength [byte]
     //
-    var riffChunkSize = loop ? 110 : 86
-    var smplChunkSize = loop ? 60 : 36
+    var riffChunkSize = loop ? 110 : 42
 
     header.push(this.stringToAscii("RIFF")) // riff
     header.push(this.uint32buffer(riffChunkSize + bufferLength)) // riffChunkSize
@@ -230,19 +229,19 @@ class Wave {
     header.push(this.uint32buffer(4)) // factChunkSize
     header.push(this.uint32buffer(bufferLength / format.bytesPerFrame)) // sampleLength
 
-    header.push(this.stringToAscii("smpl")) // smpl
-    header.push(this.uint32buffer(smplChunkSize)) // smplChunkSize, 36 + 24 * numLoop
-    header.push(this.uint32buffer(0)) // manufacturer
-    header.push(this.uint32buffer(0)) // product
-    header.push(this.uint32buffer(1e9 / format.sampleRate)) // samplePeriod
-    header.push(this.uint32buffer(60)) // midiUnityNote
-    header.push(this.uint32buffer(0)) // midiPitchFraction
-    header.push(this.uint32buffer(0)) // smpteFormat
-    header.push(this.uint32buffer(0)) // smpteOffset
-    header.push(this.uint32buffer(1)) // numSampleLoops
-    header.push(this.uint32buffer(loop ? 24 : 0)) // samplerData
-
     if (loop) {
+      header.push(this.stringToAscii("smpl")) // smpl
+      header.push(this.uint32buffer(60)) // smplChunkSize
+      header.push(this.uint32buffer(0)) // manufacturer
+      header.push(this.uint32buffer(0)) // product
+      header.push(this.uint32buffer(1e9 / format.sampleRate)) // samplePeriod
+      header.push(this.uint32buffer(60)) // midiUnityNote
+      header.push(this.uint32buffer(0)) // midiPitchFraction
+      header.push(this.uint32buffer(0)) // smpteFormat
+      header.push(this.uint32buffer(0)) // smpteOffset
+      header.push(this.uint32buffer(1)) // numSampleLoops
+      header.push(this.uint32buffer(24)) // samplerData
+
       header.push(this.uint32buffer(0)) // cuePointID
       header.push(this.uint32buffer(0)) // type
       header.push(this.uint32buffer(0)) // start
