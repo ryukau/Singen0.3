@@ -237,10 +237,7 @@ class UI {
   }
 
   random() {
-    if (this.pullDownMenuRandomType.value === "Def") {
-    }
-    else {
-      // this.inputDeclickIn.value = randomRange(0, 0.001)
+    if (this.pullDownMenuRandomType.value === "Default") {
       this.inputDecayTension.random()
 
       this.envelopeViewCarGain.random()
@@ -253,7 +250,38 @@ class UI {
       this.inputCarQTension.random()
       this.inputCarFilterStack.value = randomRangeInt(
         this.inputCarFilterStack.min, this.inputCarFilterStack.max)
-      // this.inputFrequency.random()
+      this.inputDetune.random()
+      this.inputModIndex.value = randomRange(0, 2)
+      this.inputModMix.random()
+
+      this.inputModulatorRatio.random()
+      this.inputModulatorClip.random()
+      this.pullDownMenuClipType.random()
+
+      this.inputRatioPad.random()
+      this.inputBandWidth.random()
+      this.inputSeed.random()
+      this.overtonePad.random()
+      this.envelopeViewPadGain.random()
+      this.envelopePadCutoff.random()
+      this.envelopePadQ.random()
+    }
+    else {
+      this.inputLength.value = randomRange(0.01, 1)
+      this.inputDeclickIn.value = randomRange(0, 0.001)
+      this.inputDecayTension.random()
+
+      this.envelopeViewCarGain.random()
+      this.overtoneCarrier.sparseRandom()
+      this.inputCarCutoffAmount.random()
+      this.inputCarCutoffBias.random()
+      this.inputCarCutoffTension.random()
+      this.inputCarQAmount.random()
+      this.inputCarQBias.random()
+      this.inputCarQTension.random()
+      this.inputCarFilterStack.value = randomRangeInt(
+        this.inputCarFilterStack.min, this.inputCarFilterStack.max)
+      this.inputFrequency.random()
       this.inputDetune.random()
       this.inputModIndex.value = randomRange(0, 2)
       this.inputModMix.random()
