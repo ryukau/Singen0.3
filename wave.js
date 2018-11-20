@@ -109,7 +109,7 @@ class Wave {
     for (var channel = 0; channel < this.data.length; ++channel) {
       var length = Math.min(fadeLength, this.data[channel].length)
       var coefficient = Math.pow(256, 1 / length)
-      var gain = coefficient / 256
+      var gain = 1 / 256
       for (var sample = 0; sample < length; ++sample) {
         this.data[channel][sample] *= gain
         gain *= coefficient
